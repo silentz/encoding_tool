@@ -10,6 +10,10 @@ def load_encoders():
     return encoders
 
 
+def convert_to_binary(data):
+    return ''.join(['{:0>8b}'.format(x) for x in data])
+
+
 def encode_data(encoder, data):
     module = importlib.import_module(ENCODERS_DIR + '.' + encoder)
     return module.Encoder().encode(data)
@@ -31,7 +35,10 @@ def main():
     else:
         data = data.encode()
 
-    result = encode_data(args.encoder, data)
+    data = convert_to_binary(data)
+    commander = encode_data(args.encoder, data)
+    image = commander.paint()
+    image.save(args.out_filename, 'PNG')
 
 
 if __name__ == '__main__':
