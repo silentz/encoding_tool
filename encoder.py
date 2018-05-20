@@ -35,6 +35,10 @@ def main():
     else:
         data = data.encode()
 
+    if len(data) == 0:
+        print('[!] You must provide data')
+        exit(0)
+
     data = convert_to_binary(data)
     commander = encode_data(args.encoder, data)
     image = commander.paint()
