@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--file', dest='filename', action='store', help='file with data to encode')
     parser.add_argument('--enc', dest='encoder', choices=load_encoders(), required=True, help='encoding to covert')
     parser.add_argument('--out', dest='out_filename', action='store', required=True, help='file to store result')
+    parser.add_argument('--bin', dest='binary_data', action='store', help='String containing 0 and 1')
 
     args = parser.parse_args()
     data = args.data
@@ -32,14 +33,13 @@ def main():
     if args.filename is not None:
         with open(args.filename, 'rb') as f:
             data = f.read()
+        data = convert_to_binary(data)
+    elif args.binary_data is not None:
+        data = args.binary_data
     else:
         data = data.encode()
+        data = convert_to_binary(data)
 
-    if len(data) == 0:
-        print('[!] You must provide data')
-        exit(0)
-
-    data = convert_to_binary(data)
     painter = encode_data(args.encoder, data)
     image = painter.paint()
     image.save(args.out_filename, 'PNG')
