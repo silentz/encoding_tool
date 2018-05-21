@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 
 
-class Commander:
+class Painter:
 
     def __init__(self, data, height):
         self.data = data
