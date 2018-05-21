@@ -1,61 +1,58 @@
 from PIL import Image, ImageDraw
+from modules.line import Line
 
 
 class Painter:
 
-    def __init__(self, data, height):
-        self.data = data
-        self.white = '#FFFFFF'
-        self.black = '#000000'
-        self.secondary = '#63FF36'
-        self.CELL_WIDTH = 30
-        self.CELL_HEIGHT = 40
-        self.VERTICAL_PADDING = 10
-        self.HORIZONTAL_PADDING = 10
-        self.max_value = height - 1
-        self.height = self.max_value * self.CELL_HEIGHT + 2 * self.VERTICAL_PADDING
-        self.width = len(self.data) * self.CELL_WIDTH + 2 * self.HORIZONTAL_PADDING
+    def __init__(self, lines):
+        self.lines = lines
+        self.cell_height = 40
+        self.cell_width = 10
+        self.vpadding = 40
+        self.hpadding = 40
+        self.line_width = 2
+        self.image = Image.new('RGB', self.get_size(), color='#FFFFFF')
+        self.draw = ImageDraw.Draw(self.image)
 
-    def rectangle_coord(self, block):
-        startx = self.HORIZONTAL_PADDING + block * self.CELL_WIDTH
-        finishx = startx + self.CELL_WIDTH
-        starty = self.height - self.VERTICAL_PADDING
-        finishy = starty - self.max_value * self.CELL_HEIGHT
-        return startx, starty, finishx, finishy
+    def get_level_count(self):
+        return max([x.level for x in self.lines]) + 1
 
-    def line_coord(self, block, value):
-        startx = self.HORIZONTAL_PADDING + block * self.CELL_WIDTH
-        finishx = startx + self.CELL_WIDTH
-        starty = self.height - self.VERTICAL_PADDING - value * self.CELL_HEIGHT
-        finishy = starty
-        return startx, starty, finishx, finishy
+    def get_block_count(self):
+        return sum([x.blocks for x in self.lines])
 
-    def draw_grid(self, image_draw):
-        for block in range(1, len(self.data), 2):
-            startx, starty, finishx, finishy = self.rectangle_coord(block)
-            image_draw.rectangle((startx, starty, finishx, finishy), fill=self.secondary)
+    def draw_dashed_line(self, blocks, height, colors):
+        for block in range(0, blocks):
+            xs = block * self.cell_width + self.hpadding
+            xf = (block + 1) * self.cell_width + self.hpadding
+            self.draw.line((xs, height, xf, height),
+                           fill=colors[block % len(colors)], width=self.line_width)
 
-        image_draw.line((self.HORIZONTAL_PADDING, self.height - self.VERTICAL_PADDING,
-                        self.width - self.HORIZONTAL_PADDING // 2, self.height - self.VERTICAL_PADDING),
-                        fill=self.black, width=1)
-        image_draw.line((self.HORIZONTAL_PADDING, self.height - self.VERTICAL_PADDING,
-                        self.HORIZONTAL_PADDING, self.VERTICAL_PADDING // 2),
-                        fill=self.black, width=1)
+    def get_size(self):
+        height = (self.get_level_count() - 1) * self.cell_height + 2 * self.vpadding
+        width = self.get_block_count() * self.cell_width + 2* self.hpadding
+        return (width, height)
 
-    def draw_data(self, image_draw):
-        bottom = self.height - self.VERTICAL_PADDING
-        beforex = self.HORIZONTAL_PADDING
-        beforey = bottom
-        for index, value in enumerate(self.data):
-            startx, starty, finishx, finishy = self.line_coord(index, value)
-            image_draw.line((startx, starty, finishx, finishy), fill=self.black, width=2)
-            image_draw.line((beforex, beforey, startx, starty), fill=self.black, width=2)
-            beforex = finishx
-            beforey = finishy
+    def draw_grid(self):
+        synchro_colors = ['#FF0000', '#00FF00']
+        levels = self.get_level_count()
+        base_line = (self.get_level_count() - 1) * self.cell_height + self.vpadding
+        for level in range(0, levels):
+            vy = base_line - level * self.cell_height + self.line_width
+            self.draw_dashed_line(self.get_block_count(), vy, synchro_colors)
+
+    def draw_data(self):
+        beforex = self.hpadding
+        beforey = (self.get_level_count() - 1) * self.cell_height + self.vpadding
+        base_line = beforey
+        for line in self.lines:
+            newx = line.blocks * self.cell_width + beforex
+            newy = base_line - line.level * self.cell_height
+            self.draw.line((beforex, newy, newx, newy), fill='#000000', width=self.line_width)
+            self.draw.line((beforex, beforey, beforex, newy), fill='#000000', width=self.line_width)
+            beforex = newx
+            beforey = newy
 
     def paint(self):
-        image = Image.new('RGB', (self.width, self.height), color=self.white)
-        draw = ImageDraw.Draw(image)
-        self.draw_grid(draw)
-        self.draw_data(draw)
-        return image
+        self.draw_grid()
+        self.draw_data()
+        return self.image

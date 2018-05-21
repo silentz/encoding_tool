@@ -1,7 +1,8 @@
 from modules.painter import Painter
-
+from modules.line import Line
 
 class Encoder:
 
     def encode(self, data):
-        return Painter(data=[int(x) for x in data], height=2)
+        lines = [Line(int(x)) for x in data]
+        return Painter(lines=lines)
