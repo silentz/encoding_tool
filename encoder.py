@@ -40,8 +40,8 @@ def main():
         exit(0)
 
     data = convert_to_binary(data)
-    commander = encode_data(args.encoder, data)
-    image = commander.paint()
+    painter = encode_data(args.encoder, data)
+    image = painter.paint()
     image.save(args.out_filename, 'PNG')
 
 
