@@ -1,7 +1,7 @@
-from modules.commander import Commander
+from modules.painter import Painter
 
 
 class Encoder:
 
     def encode(self, data):
-        return Commander(data=[int(x) for x in data], height=2)
+        return Painter(data=[int(x) for x in data], height=2)

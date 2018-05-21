@@ -1,4 +1,4 @@
-from modules.commander import Commander
+from modules.painter import Painter
 
 class Encoder:
 
@@ -9,4 +9,4 @@ class Encoder:
             if element == '1':
                 current_element = (current_element + 1) % 2
             new_sequence.append(current_element)
-        return Commander(data=new_sequence, height=2)
+        return Painter(data=new_sequence, height=2)
